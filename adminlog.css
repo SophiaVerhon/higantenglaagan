@@ -1,0 +1,92 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body and Background Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0fff0;
+    color: #003300;
+}
+
+
+/* Navbar Styling */
+.navbar {
+    background-color: #006600;
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.navbar a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+}
+
+.navbar a:hover {
+    background-color: #004d00;
+    border-radius: 5px;
+}
+/* Login Form Styling */
+form {
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background for form */
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    width: 300px;
+    text-align: center;
+}
+
+/* Form Title */
+h2 {
+    margin-bottom: 20px;
+    color: #4CAF50;
+}
+
+/* Input Fields Styling */
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Button Styling */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Error Message Styling */
+.error-message {
+    margin-top: 10px;
+    color: red;
+    font-size: 14px;
+}
+
+/* Message Styling (if any) */
+p {
+    color: red;
+    font-size: 14px;
+    margin-top: 20px;
+}
+

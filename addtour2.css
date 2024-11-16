@@ -1,0 +1,110 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0fff0;
+    color: #003300;
+}
+
+.navbar {
+    background-color: #006600;
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.navbar a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+}
+
+.navbar a:hover {
+    background-color: #004d00;
+    border-radius: 5px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+    color: #4CAF50;
+}
+
+.tour-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.tour-item {
+    width: 48%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #fafafa;
+    text-align: center;
+}
+
+.tour-item img {
+    width: 50%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.add-tour-button {
+
+    text-align: right;
+    margin-top: 10px;
+}
+
+.add-tour-button a {
+    color: #4CAF50;
+    font-size: 1.2em;
+    text-decoration: none;
+}
+.logout-button {
+    background-color: #009900;
+    color: #ffffff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+.logout-button:hover {
+    background-color: #007700;
+}
+.book-now-button {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: #ffffff;
+    padding: 10px 30px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 50px; /* Makes the button oval-shaped */
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.book-now-button:hover {
+    background-color: #388E3C; /* Darker green on hover */
+}
+
+
+
+
