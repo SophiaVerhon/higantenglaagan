@@ -1,0 +1,468 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: #e4e9f7;
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+    color: #333;
+}
+
+/* Main container */
+.main-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Background Video */
+.background-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; 
+    object-fit: cover;
+    z-index: -1;
+}
+
+/* Header */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Adjusts the alignment */
+    padding: 20px 20px; /* Adjusts the padding */
+    background-color: #1E5F2D;
+    color: white;
+    height: 120px;
+}
+
+.header-logo-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 10px;
+}
+
+.header-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.logo-image {
+    margin-top: 5px; /* Reduce top margin */
+    margin-bottom: 0; /* Remove bottom margin */
+    width: 60px;
+    height: 60px;
+}
+
+.header-nav {
+    display: flex;
+    gap: 30px; /* Increased gap between navigation items */
+    align-items: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: bold;
+    padding-bottom: 5px;
+    font-size: 18px; /* Adjusts font size if needed */
+}
+
+/* General Sections */
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 90vh;
+    position: relative;
+    z-index: 1;
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+
+.welcome-text {
+    color: white;
+    font-size: 50px;
+    font-weight: bold;
+}
+
+/* Tours Section */
+.tours-section {
+    width: 100%;
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-left: 10px;
+}
+
+.section-title {
+    color: #1E5F2D;
+    font-weight: bold;
+    font-size: 50px;
+}
+
+.see-more {
+    color: #1E5F2D;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 20px; 
+    cursor: pointer;
+    margin-right: 20px; 
+}
+
+/* Scrollable Tour Containers */
+.scroll-container {
+    display: flex;
+    overflow-x: auto;
+    padding: 20px;
+    gap: 15px;
+    white-space: nowrap;
+}
+
+.rectangle {
+    width: 330px;
+    height: 330px;
+    border-radius: 10px;
+    flex: 0 0 auto;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    background-color: #ffffff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rectangle:nth-child(odd) {
+    background-color: #EE5023;
+}
+
+.rectangle:nth-child(even) {
+    background-color: #54A350;
+}
+
+.tour-image {
+    width: 330px;
+    height:200px;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 5px;
+}
+
+.tour-title {
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    margin: 5px 0;
+}
+
+.tour-button {
+    background-color: #ffffff;
+    color: #1E5F2D;
+    border: 2px solid #1E5F2D;
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 25px;
+    width: 80%;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.tour-button:hover {
+    background-color: #1E5F2D;
+    color: #ffffff;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Reviews Section */
+.reviews-section {
+    width: 100%;
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+.reviews-header {
+    width: 100%;
+    background-color: #f4f4f4; 
+    padding: 20px;
+    text-align: center;
+    font-size: 45px;
+    font-weight: bold;
+    color: #1E5F2D;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15); 
+    margin-bottom: 20px;
+}
+
+.review-rectangle {
+    width: 300px;
+    height: 150px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+
+.reviewer-image {
+    width: 50px;
+    height: 50px;
+}
+
+.reviewer-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.review-content {
+    font-size: 14px;
+    color: #333333;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    height: 200px;
+    background-color: #1D2231;
+    color: white;
+}
+
+/* Specific styles for form pages (login, register, home, edit) */
+.form-page {
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+}
+
+.form-page .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: 20px;
+}
+
+.form-page .form-box {
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.form-page .form-box header {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1E5F2D;
+    margin-bottom: 20px;
+}
+
+.form-page .field {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-page .field label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.form-page .input input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-page .input input:focus {
+    border-color: #1E5F2D;
+}
+
+.form-page .btn {
+    width: 100%;
+    background-color: #E4532B;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.form-page .btn:hover {
+    background-color: #d44320;
+}
+
+.form-page .links {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.form-page .links a {
+    color: #1E5F2D;
+    text-decoration: none;
+}
+
+.form-page .links a:hover {
+    text-decoration: underline;
+}
+
+.form-page .message {
+    text-align: center;
+    background-color: #f9eded;
+    padding: 15px;
+    border: 1px solid #E4532B;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    color: #E4532B;
+}
+
+/* Modal styling */
+.form-page .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.form-page .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
+    max-width: 80%;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.form-page .modal-content p {
+    color: red;
+    margin-bottom: 15px;
+}
+
+.form-page .close-btn {
+    background-color: #E4532B;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.intro-text-box, .details-text-box {
+    text-align: left; /* Remove centering */
+    padding: 0; /* Remove padding */
+    background: none; /* Remove background */
+    border-radius: 0; /* Remove border radius */
+    box-shadow: none; /* Remove shadow */
+}
+
+/* Image Row Styling */
+.image-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px auto;
+}
+
+.destination-image {
+    width: 100%;
+    max-width: 200px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.white-background {
+    background-color: white;
+}
+
+.about-section {
+    padding: 30px;
+    background-color: #f9f9f9;
+}
+
+.section-header .section-title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.about-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px; /* Adjust the gap between title and image */
+}
+
+.intro-text {
+    font-size: 18px;
+    line-height: 1.5;
+    max-width: 100%; /* Full width */
+}
+
+.image-row {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.destination-image {
+    width: 400px; /* Image width should be reduced */
+    height: 300px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.details-text {
+    font-size: 18px;
+    text-align: justify;
+    padding: 0; /* Remove padding */
+    margin-top: 5px;
+}
