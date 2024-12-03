@@ -14,7 +14,7 @@ $result = $conn->query($query);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer List</title>
    
-    <link rel="stylesheet" href="css/customer_list_style.css"> 
+    <link rel="stylesheet" href="css/customer_list.css"> 
 </head>
 <body>
 <div class="close-btn-container">

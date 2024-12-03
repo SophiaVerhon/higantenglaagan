@@ -1,42 +1,66 @@
 <?php
-
-include('db_connect.php');
-
-$message = "";
-$messageClass = "";
-
+include('db_connect.php'); // Database connection
+$message = ""; // Message for success or errors
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-   
+
+    // Retrieve form data
     $name = $_POST['name'];
     $email = $_POST['email'];
     $phone = $_POST['phone_no'];
     $address = $_POST['address'];
+    $tour_id = $_POST['tour_id']; // Ensure this is passed in the form
+    $valid_id_path = ""; // Initialize valid ID path
 
-    
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message = "Invalid email format.";
-        $messageClass = "error";
-    } elseif (!is_numeric($phone)) {
-        $message = "Phone number must be numeric.";
-        $messageClass = "error";
-    } else {
-       
-        $query = "INSERT INTO customer (name, email, phone_no, address) VALUES (?, ?, ?, ?)";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("ssis", $name, $email, $phone, $address);
+    // File upload logic
+    if (isset($_FILES['valid_id']) && $_FILES['valid_id']['error'] === UPLOAD_ERR_OK) {
+        $target_dir = "uploads/";
+        $file_name = basename($_FILES['valid_id']['name']);
+        $target_file = $target_dir . uniqid() . "-" . $file_name; // Unique name for uploaded file
 
-        
-        if ($stmt->execute()) {
-            $message = "Customer registered successfully!";
-            $messageClass = "success";
+        // Validate file type (e.g., images or PDFs)
+        $allowed_types = ['jpg', 'jpeg', 'png', 'pdf'];
+        $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+        if (in_array($file_type, $allowed_types)) {
+            if (move_uploaded_file($_FILES['valid_id']['tmp_name'], $target_file)) {
+                $valid_id_path = $target_file; // Save file path for the database
+            } else {
+                $message = "Error uploading valid ID. Please try again.";
+            }
         } else {
-            $message = "Error registering customer: " . $stmt->error;
-            $messageClass = "error";
+            $message = "Invalid file type for valid ID. Allowed types: JPG, PNG, PDF.";
+        }
+    }
+
+    // Insert data into the database if no errors
+    if (empty($message)) {
+        // Insert customer details
+        $customer_query = "INSERT INTO customer (name, email, phone_no, address, valid_id_path) VALUES (?, ?, ?, ?, ?)";
+        $stmt_customer = $conn->prepare($customer_query);
+        $stmt_customer->bind_param("sssss", $name, $email, $phone, $address, $valid_id_path);
+
+        if ($stmt_customer->execute()) {
+            // Retrieve the new customer's ID
+            $customer_id = $stmt_customer->insert_id;
+
+            // Insert booking details
+            $booking_query = "INSERT INTO booking (customer_id, tour_id, booking_date) VALUES (?, ?, NOW())";
+            $stmt_booking = $conn->prepare($booking_query);
+            $stmt_booking->bind_param("ii", $customer_id, $tour_id);
+
+            if ($stmt_booking->execute()) {
+                $message = "Successfully Booked, See You on Tour!";
+            } else {
+                $message = "Error adding booking: " . $stmt_booking->error;
+            }
+
+            $stmt_booking->close();
+        } else {
+            $message = "Error adding customer: " . $stmt_customer->error;
         }
 
-        
-        $stmt->close();
+        $stmt_customer->close();
     }
 }
 
@@ -48,79 +72,17 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Customer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .form-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-container input, .form-container textarea, .form-container button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        .form-container button {
-            background-color: #28a745;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .form-container button:hover {
-            background-color: #218838;
-        }
-
-        .message {
-            padding: 10px;
-            border-radius: 4px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
+    <link rel="stylesheet" href="css/customer_form_style.css"> <!-- Link to your CSS -->
+    <title>Booking Confirmation</title>
 </head>
 <body>
-
-<h2>Add New Customer</h2>
-
-<?php if ($message != "") { ?>
-    <div class="message <?php echo $messageClass; ?>">
-        <?php echo $message; ?>
-    </div>
-<?php } ?>
-<?php if ($message == "Customer registered successfully!") { ?>
-        <button class="ok-button" onclick="window.location.href='admin_home.php'">OK</button>
-    <?php } ?>
-<div class="form-container">
-    <form action="customer_add.php" method="POST">
-</form>
+<div class="container">
+    <?php if (!empty($message)): ?>
+        <div class="message-box">
+            <p><?php echo $message; ?></p>
+            <a href="users/user_tour.php" class="btn">Go Back to Tours</a>
+        </div>
+    <?php endif; ?>
 </div>
+</body>
+</html>

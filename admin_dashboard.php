@@ -25,6 +25,11 @@ $result = $conn->query($query);
 $row = $result->fetch_assoc();
 $total_tours = $row['total_tours'];
 
+// Query to get unread notifications count
+$unread_query = "SELECT COUNT(*) AS unread_count FROM notifications WHERE is_read = 0";
+$unread_result = $conn->query($unread_query);
+$unread_count = $unread_result->fetch_assoc()['unread_count'];
+
 $conn->close();
 ?>
 
@@ -38,6 +43,7 @@ $conn->close();
 </head>
 <body>
 
+    <!-- Navbar -->
     <div class="navbar">
         <a href="admin_home.php">Home</a>
         <a href="admin_tour.php">Tours</a>
@@ -46,12 +52,20 @@ $conn->close();
         <a href="tour_add.php">+ Add New Tour</a>
         <a href="admin_dashboard.php">Dashboard</a>
         <a href="logout.php" class="logout-button">Logout</a>
+
+        <!-- Notifications Badge in Navbar -->
+        <a href="admin_notifications.php" class="notification-badge">
+            <?php if ($unread_count > 0): ?>
+                <span class="badge"><?php echo $unread_count; ?></span>
+            <?php endif; ?>
+        </a>
     </div>
 
+    <!-- Dashboard Statistics -->
     <div class="container">
         <h2>Welcome to the Admin Dashboard</h2>
 
-        <!-- Dashboard Cards for Statistics -->
+        <!-- Notification Badge above the cards -->
         <div class="dashboard-cards">
             <div class="dashboard-card">
                 <h3>Total Customers</h3>
@@ -61,17 +75,25 @@ $conn->close();
             <div class="dashboard-card">
                 <h3>Booking List</h3>
                 <p><?php echo $total_bookings; ?></p>
-                <a href="booking_list.php" class="view-customers-btn">View booking List</a>
+                <a href="booking_list.php" class="view-customers-btn">View Booking List</a>
             </div>
             <div class="dashboard-card">
                 <h3>Upcoming Tours</h3>
                 <p><?php echo $upcoming_tours; ?></p>
+                <!-- Notification Badge for Unread Notifications in Upcoming Tours -->
+                <?php if ($unread_count > 0): ?>
+                    <div class="notification-badge-upcoming">
+                        <span class="badge"><?php echo $unread_count; ?> Unread Notifications</span>
+                    </div>
+                <?php endif; ?>
+                <a href="upcoming_tours.php" class="view-customers-btn">View Upcoming Tours</a>
             </div>
-            <div class="total-tours-card">
+            <div class="dashboard-card">
                 <h3>Total Tours</h3>
-                <p><?php echo $total_tours; ?></p> <!-- Dynamic total tours value -->
+                <p><?php echo $total_tours; ?></p>
             </div>
         </div>
     </div>
+
 </body>
 </html>

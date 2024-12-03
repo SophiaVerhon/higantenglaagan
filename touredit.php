@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Bind the parameters, including `tour_id`
     $stmt->bind_param("ssissssi", $tour_name, $description, $price_per_person, $start_date, $end_date, $location, $image_path, $tour_id);
     if ($stmt->execute()) {
-        // Redirect to admin_tour.php after updating
+        // Ensure redirect occurs after a successful update
         header("Location: admin_tour.php");
         exit();
     } else {
@@ -54,12 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/addtour_style.css">
+    <link rel="stylesheet" href="css/addtour_edit.css">
     <title>Edit Tour</title>
 </head>
 <body>
 
 <h2>Edit Tour Details</h2>
+<button class="close-button" onclick="window.location.href='admin_tour.php';">×</button>
 
 <form action="" method="POST">
     <label for="tour_name">Tour Name:</label>
