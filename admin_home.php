@@ -3,7 +3,7 @@ session_start();
 include("db_connect.php"); 
 $currency_symbol = "₱";
 
-
+// Fetch most popular tours
 $sql = "
     SELECT t.tour_id, t.tour_name, t.image_path, t.price_per_person, COUNT(b.booking_id) AS booking_count
     FROM tour t
@@ -13,20 +13,20 @@ $sql = "
     ORDER BY booking_count DESC
     LIMIT 4;
 ";
-
 $result = $conn->query($sql);
-
 
 $popular_tours = [];
 if ($result && $result->num_rows > 0) {
     $popular_tours = $result->fetch_all(MYSQLI_ASSOC);
 }
 
+// Fetch upcoming tours
 $upcoming_query = "
     SELECT t.tour_id, t.tour_name, t.description, t.start_date, t.end_date, t.price_per_person, t.location, t.image_path 
     FROM tour t
     WHERE t.start_date > NOW()  -- Only upcoming tours
-    ORDER BY t.start_date ASC";  
+    ORDER BY t.start_date ASC
+    LIMIT 4"; 
 $upcoming_result = $conn->query($upcoming_query);
 ?>
 
@@ -49,17 +49,12 @@ $upcoming_result = $conn->query($upcoming_query);
             <nav class="header-navHP">
                 <a href="#" class="nav-linkHP">MOST POPULAR</a>
                 <a href="admin_tour.php" class="nav-linkHP">ALL TOURS</a>
-                <a href="tour_add.php"class="nav-linkHP">+ Add New Tour</a>
-                <a href="admin_dashboard.php"class="nav-linkHP">Dashboard</a>
-                <a href="logout.php" class="nav-linkHP">Logout</a>
-            
-                <div class="dropdown">
-                    <div id="profile-dropdown" class="dropdown-menu">
-                        <a href="my-account" class="dropdown-item">My Account</a>
-                        <a href="profile-booking-status" class="dropdown-item">Booking Status</a>
-                        <a href="logout" class="dropdown-item">Log Out</a>
-                    </div>
-                </div>
+                <a href="#tours" class="nav-linkHP">SEARCH</a>
+                <a href="#about-us-footer" class="nav-linkHP">ABOUT US</a>
+                <a href="tour_add.php" class="nav-linkHP">+Add New Tour</a>
+                <a href="logout.php " class="nav-linkHP">Logout</a>
+                
+                
             </nav>
         </header>
 
@@ -76,27 +71,22 @@ $upcoming_result = $conn->query($upcoming_query);
             <div class="scroll-container">
                 <?php if (!empty($popular_tours)): ?>
                     <?php foreach ($popular_tours as $tour): ?>
-                        <div class="rectangle" onclick="window.location.href='other.php?tour_id=<?php echo htmlspecialchars($tour['tour_id']); ?>'">
+                        <div class="rectangle" onclick="window.location.href='tour_details.php?tour_id=<?php echo htmlspecialchars($tour['tour_id']); ?>'">
                             <div class="image-container">
                                 <?php
-                                // Construct the correct image path for the new location
-                                $imagePath = 'http://localhost/higante/users/tour/uploads/tours/' . htmlspecialchars($tour['image_path']);
-                                
-                                // Debugging line: Print image path
-                                echo "<!-- Image path: $imagePath -->"; 
-                                
-                                // Check if the image file exists
-                                if (file_exists($imagePath)): ?>
-                                    <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($tour['tour_name']); ?>" class="tour-image">
-                                <?php else: ?>
-                                    <p>Image not available</p>
-                                <?php endif; ?>
+                                // Output image from BLOB
+                                if (!empty($tour['image_path'])):
+                                    echo '<img src="data:image/jpeg;base64,' . base64_encode($tour['image_path']) . '" alt="' . htmlspecialchars($tour['tour_name']) . '" class="tour-image">';
+                                else:
+                                    echo "<p>Image not available</p>";
+                                endif;
+                                ?>
                             </div>
                             <div class="tour-details">
                                 <p class="tour-title2"><?php echo htmlspecialchars($tour['tour_name']); ?></p>
                                 <p><?php echo $currency_symbol . htmlspecialchars($tour['price_per_person']); ?> per person</p>
                             </div>
-                            <a href="../customer_form.php?tour_id=<?php echo htmlspecialchars($tour['tour_id']); ?>" class="tour-button">Book Now</a>
+                            <a href="tour_details.php?tour_id=<?php echo htmlspecialchars($tour['tour_id']); ?>" class="tour-button">Book Now</a>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -105,59 +95,97 @@ $upcoming_result = $conn->query($upcoming_query);
             </div>
         </section>
 
+        <section id="upcoming" class="tours-section2">
+            <div class="section-header">
+                <div class="left-header">
+                    <p class="section-title">UPCOMING TOURS</p>
+                </div>
+            </div>
+            <div class="scroll-container">
+                <?php if ($upcoming_result->num_rows > 0): ?>
+                    <?php while ($tour = $upcoming_result->fetch_assoc()): ?>
+                        <div class="rectangle" onclick="window.location.href='../tour_details.php?tour_id=<?php echo htmlspecialchars($tour['tour_id']); ?>'">
+                            <div class="image-container">
+                                <?php
+                                // Output image from BLOB
+                                if (!empty($tour['image_path'])):
+                                    echo '<img src="data:image/jpeg;base64,' . base64_encode($tour['image_path']) . '" alt="' . htmlspecialchars($tour['tour_name']) . '" class="tour-image">';
+                                else:
+                                    echo "<p>Image not available</p>";
+                                endif;
+                                ?>
+                            </div>
+                            <div class="tour-details">
+                                <p class="tour-title2"><?php echo htmlspecialchars($tour['tour_name']); ?></p>
+                                <p><?php echo $currency_symbol . htmlspecialchars($tour['price_per_person']); ?> per person</p>
+                            </div>
+                            <a href="tour_details.php?tour_id=<?php echo htmlspecialchars($tour['tour_id']); ?>" class="tour-button">Book Now</a>
+                        </div>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p>No upcoming tours available at the moment.</p>
+                <?php endif; ?>
+            </div>
+        </section>
+
         <!-- All Upcoming Tours Section -->
         <section id="tours" class="tours-section2">
-        <div class="section-header">
-            <div class="left-header">
-                <p class="section-title">ALL TOURS</p>
-            </div>
-            <div class="search-wrapper">
-                <div class="search-container">
-                    <input type="text" class="search-input" placeholder="Search...">
-                    <button class="search-button">
-                        <img src="image/searchicon.png" alt="Search" class="search-icon">
-                    </button>
-                    <div class="filter-buttons">
+    <div class="section-header">
+        <div class="left-header">
+            <p class="section-title">ALL TOURS</p>
+        </div>
+        <div class="search-wrapper">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search...">
+                <button class="search-button">
+                    <img src="image/searchicon.png" alt="Search" class="search-icon">
+                </button>
+                <div class="filter-buttons">
                     <button class="filter-button" data-category="all">All Tours</button>
                     <button class="filter-button" data-category="minor-hike">Minor Dayhike</button>
                     <button class="filter-button" data-category="major-hike">Major Dayhike</button>
                     <button class="filter-button" data-category="day-tour">Day Tour</button>
                     <button class="filter-button" data-category="2d1n-adventure">2D1N Adventure</button>
                     <button class="filter-button" data-category="3d2n-adventure">3D2N Adventure</button>
-                    </div>
                 </div>
             </div>
         </div>
-            <div class="scroll-container">
-                
-                <?php
-                // Display upcoming tours
-                if ($upcoming_result->num_rows > 0) {
-                    while ($tour = $upcoming_result->fetch_assoc()) {
-                        echo "<div class='rectangle'>";
-                        echo "<div class='image-container'>";
-                        $imagePath = 'http://localhost/higante/users/tour/uploads/tours/' . htmlspecialchars($tour['image_path']);
-                        if (file_exists($imagePath)): ?>
-                            <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($tour['tour_name']); ?>" class="tour-image">
-                        <?php else: ?>
-                            <p>Image not available</p>
-                        <?php endif; ?>
-                        </div>
-                        <div class="tour-details">
-                            <p class="tour-title2"><?php echo htmlspecialchars($tour['tour_name']); ?></p>
-                            <p><?php echo $currency_symbol . htmlspecialchars($tour['price_per_person']); ?> per person</p>
-                        </div>
-                        <a href="tour_details.php?tour_id=<?php echo htmlspecialchars($tour['tour_id']); ?>" class="tour-button">View Details</a>
-                        </div>
-                    <?php }
-                } else {
-                    echo "<p>No upcoming tours available.</p>";
-                }
-                ?>
-            </div>
-        </section>
+    </div>
+    <div class="scroll-container">
+        <?php
+        // Updated query to fetch only upcoming tours (start_date > NOW())
+        $allToursQuery = "
+            SELECT t.tour_id, t.tour_name, t.description, t.start_date, t.end_date, t.price_per_person, t.location, t.image_path
+            FROM tour t
+            WHERE t.start_date > NOW()  -- Only upcoming tours
+            ORDER BY t.start_date ASC";  
+        $allToursResult = $conn->query($allToursQuery);
+        
+        if ($allToursResult->num_rows > 0) {
+            while ($tour = $allToursResult->fetch_assoc()) {
+                echo "<div class='rectangle'>";
+                echo "<div class='image-container'>";
+                // Output image from BLOB (checking for image availability)
+                if (!empty($tour['image_path'])):
+                    echo '<img src="data:image/jpeg;base64,' . base64_encode($tour['image_path']) . '" alt="' . htmlspecialchars($tour['tour_name']) . '" class="tour-image">';
+                else:
+                    echo "<p>Image not available</p>";
+                endif;
+                echo "</div>";
+                echo "<div class='tour-details'>";
+                echo "<p class='tour-title2'>" . htmlspecialchars($tour['tour_name']) . "</p>";
+                echo "<p>" . $currency_symbol . htmlspecialchars($tour['price_per_person']) . " per person</p>";
+                echo "</div>";
+                echo "<a href='tour_details.php?tour_id=" . htmlspecialchars($tour['tour_id']) . "' class='tour-button'>View Details</a>";
+                echo "</div>";
+            }
+        } else {
+            echo "<p>No upcoming tours available.</p>";
+        }
+        ?>
+    </div>
+</section>
 
-        <!-- About Us Footer Section -->
         <footer id="about-us-footer">
             <div class="footerContainer">
                 <div class="socialIcons">
@@ -172,7 +200,6 @@ $upcoming_result = $conn->query($upcoming_query);
                         <li><a href="">Contact</a></li>
                     </ul>
                 </div>
-                
             </div>
             <div class="footerBottom">
                 <p>Copyright &copy;2024; Designed by <span class="designer">CASSanga</span></p>

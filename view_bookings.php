@@ -32,6 +32,7 @@ if ($stmt = $conn->prepare($tour_query)) {
 // Prepare the query to get bookings for the specific tour
 $query = "
     SELECT
+        customer.customer_id,
         customer.name AS customer_name,
         booking.booking_id,
         booking.booking_date,
@@ -53,7 +54,6 @@ if ($stmt = $conn->prepare($query)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Bookings</title>
-    <!-- Link to the CSS file -->
     <link rel="stylesheet" href="css/view_bookings.css">
 </head>
 <body>
@@ -100,4 +100,3 @@ if ($stmt = $conn->prepare($query)) {
     </div>
 </body>
 </html>
-

@@ -7,7 +7,6 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 
-// Query to get data for each section
 $total_customers_query = "SELECT COUNT(*) AS total_customers FROM customer";
 $total_customers_result = $conn->query($total_customers_query);
 $total_customers = $total_customers_result->fetch_assoc()['total_customers'];

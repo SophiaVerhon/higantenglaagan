@@ -20,8 +20,22 @@ if (isset($_GET['mark_all_read'])) {
     exit();
 }
 
-// Fetch notifications from the database
-$notifications_query = "SELECT * FROM notifications ORDER BY created_at DESC";
+// Fetch notifications from the database, joining with the tour table to get the tour name
+$notifications_query = "
+    SELECT 
+        notifications.notification_id, 
+        notifications.message, 
+        notifications.created_at, 
+        notifications.is_read, 
+        IFNULL(tour.tour_name, 'No tour name') AS tour_name
+    FROM 
+        notifications 
+    LEFT JOIN 
+        tour 
+    ON 
+        notifications.tour_id = tour.tour_id 
+    ORDER BY 
+        notifications.created_at DESC";
 $result = $conn->query($notifications_query);
 ?>
 <!DOCTYPE html>
@@ -48,7 +62,14 @@ $result = $conn->query($notifications_query);
         <ul>
             <?php while ($notification = $result->fetch_assoc()): ?>
                 <li class="<?php echo $notification['is_read'] ? 'read' : 'unread'; ?>">
-                    <?php echo htmlspecialchars($notification['message']); ?>
+                    <?php 
+                        // Replace {tour_name} in the message with the actual tour name
+                        $message = $notification['message'];
+                        if (strpos($message, '{tour_name}') !== false && !empty($notification['tour_name'])) {
+                            $message = str_replace('{tour_name}', $notification['tour_name'], $message);
+                        }
+                        echo htmlspecialchars($message); 
+                    ?>
                     <span class="timestamp"><?php echo $notification['created_at']; ?></span>
                 </li>
             <?php endwhile; ?>

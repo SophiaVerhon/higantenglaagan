@@ -1,16 +1,13 @@
 <?php
-include('db_connect.php'); // Database connection
-include('get_upcomingtours.php'); // Include the file with the function
+include('db_connect.php'); 
+include('get_upcomingtours.php'); 
 
-// Now you can call the function
-$upcoming_tours = get_upcoming_tours($conn); // Include the file that defines get_upcoming_tours function
+$upcoming_tours = get_upcoming_tours($conn); 
 $currency_symbol = "₱";
-// Ensure session is started only if not already active
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Check if the admin is logged in
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header("Location: admin_log.php");
     exit();
@@ -90,37 +87,31 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
         <h2>Upcoming Tours</h2>
 
         <?php
-        // Check if any upcoming tours exist
         if ($upcoming_tours && $upcoming_tours->num_rows > 0) {
             while ($tour = $upcoming_tours->fetch_assoc()) {
                 echo "<div class='tour-details'>";
-                // Left side for tour details
                 echo "<div class='tour-left'>";
                 echo "<h3>" . htmlspecialchars($tour['tour_name']) . "</h3>";
                 echo "<p><strong>Start Date:</strong> " . htmlspecialchars($tour['start_date']) . "</p>";
                 echo "<p><strong>Description:</strong> " . htmlspecialchars($tour['description']) . "</p>";
                 echo "<p><strong>Price per Person:</strong> " . $currency_symbol . number_format($tour['price_per_person'], 2) . "</p>";
-                echo "</div>"; // Close tour-left div
+                echo "</div>";
 
-                // Right side for people booked count
                 echo "<div class='tour-right'>";
                 echo "<p><strong>People Booked:</strong> " . $tour['total_booked'] . " people</p>";
 
-                // "View Details" button (keeps it at the top)
                 echo "<a href='tour_details.php?tour_id=" . $tour['tour_id'] . "' class='view-btn'>View Details</a>";
 
-                // "View Bookings" button (below View Details)
                 echo "<a href='view_bookings.php?tour_id=" . $tour['tour_id'] . "' class='view-booking-btn'>View Bookings</a>";
 
-                echo "</div>"; // Close tour-right div
+                echo "</div>"; 
                 
-                echo "</div>"; // Close tour-details div
+                echo "</div>"; 
             }
         } else {
             echo "<p>No upcoming tours available at the moment.</p>";
         }
 
-        // Close the database connection
         $conn->close();
         ?>
     </div>

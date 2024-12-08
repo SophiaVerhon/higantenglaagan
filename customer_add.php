@@ -9,16 +9,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $phone = $_POST['phone_no'];
     $address = $_POST['address'];
-    $tour_id = $_POST['tour_id']; // Ensure this is passed in the form
-    $valid_id_path = ""; // Initialize valid ID path
+    $tour_id = $_POST['tour_id']; 
+    $valid_id_path = ""; 
 
-    // File upload logic
     if (isset($_FILES['valid_id']) && $_FILES['valid_id']['error'] === UPLOAD_ERR_OK) {
         $target_dir = "uploads/";
         $file_name = basename($_FILES['valid_id']['name']);
         $target_file = $target_dir . uniqid() . "-" . $file_name; // Unique name for uploaded file
 
-        // Validate file type (e.g., images or PDFs)
         $allowed_types = ['jpg', 'jpeg', 'png', 'pdf'];
         $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
@@ -33,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // Insert data into the database if no errors
     if (empty($message)) {
         // Insert customer details
         $customer_query = "INSERT INTO customer (name, email, phone_no, address, valid_id_path) VALUES (?, ?, ?, ?, ?)";
@@ -41,10 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt_customer->bind_param("sssss", $name, $email, $phone, $address, $valid_id_path);
 
         if ($stmt_customer->execute()) {
-            // Retrieve the new customer's ID
             $customer_id = $stmt_customer->insert_id;
 
-            // Insert booking details
             $booking_query = "INSERT INTO booking (customer_id, tour_id, booking_date) VALUES (?, ?, NOW())";
             $stmt_booking = $conn->prepare($booking_query);
             $stmt_booking->bind_param("ii", $customer_id, $tour_id);
