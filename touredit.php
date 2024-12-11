@@ -2,13 +2,11 @@
 include('db_connect.php');
 session_start();
 
-// Ensure admin is logged in
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header("Location: admin_log.php");
     exit();
 }
 
-// Retrieve the current tour details
 if (isset($_GET['id'])) {
     $tour_id = $_GET['id'];
     $query = "SELECT * FROM tour WHERE tour_id = ?";
@@ -18,7 +16,6 @@ if (isset($_GET['id'])) {
     $result = $stmt->get_result();
     $tour = $result->fetch_assoc();
     
-    // Retrieve the associated tour guides
     $guide_query = "SELECT tg.guide_id, tg.name, tg.contact_no FROM tourguide tg 
                     JOIN tour_guide_assignment tga ON tg.guide_id = tga.guide_id
                     WHERE tga.tour_id = ?";
@@ -28,7 +25,6 @@ if (isset($_GET['id'])) {
     $guide_result = $stmt_guides->get_result();
     $tour_guides = $guide_result->fetch_all(MYSQLI_ASSOC);
 } else {
-    // Handle the case if tour ID is not passed
     die("Tour ID is missing.");
 }
 
@@ -36,10 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tour_name = $_POST['tour_name'];
     $description = $_POST['description'];
     $start_date = $_POST['start_date'];
-    $end_date = $_POST['end_date'];
+    $end_date = isset($_POST['end_date']) ? $_POST['end_date'] : null; // Allow null if not provided
     $price_per_person = $_POST['price_per_person'];
     $location = $_POST['location'];
-    $max_bookings = $_POST['max_bookings']; // Get max_bookings from the form
+    $max_bookings = $_POST['max_bookings']; 
+    $is_exclusive = $_POST['tour_type'] == '1' ? 1 : 0; 
+    $min_bookings = $is_exclusive ? $_POST['min_bookings'] : null; 
     $guide_names = $_POST['guide_name']; // Array of guide names
     $guide_contact_nos = $_POST['guide_contact_no']; // Array of guide contact numbers
 
@@ -53,23 +51,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Update the tour record, including the image data
-    $update_query = "UPDATE tour SET tour_name = ?, description = ?, start_date = ?, end_date = ?, price_per_person = ?, location = ?, max_bookings = ?, image_path = ? WHERE tour_id = ?";
+    $update_query = "UPDATE tour SET tour_name = ?, description = ?, start_date = ?, end_date = ?, price_per_person = ?, location = ?, max_bookings = ?, image_path = ?, min_bookings = ? WHERE tour_id = ?";
     $stmt = $conn->prepare($update_query);
-    $stmt->bind_param("ssssdsssi", $tour_name, $description, $start_date, $end_date, $price_per_person, $location, $max_bookings, $image_data, $tour_id);
+    $stmt->bind_param("ssssdsssis", $tour_name, $description, $start_date, $end_date, $price_per_person, $location, $max_bookings, $image_data, $min_bookings, $tour_id);
 
     if ($stmt->execute()) {
         // Update guides if necessary
         foreach ($guide_names as $index => $guide_name) {
             $guide_contact_no = $guide_contact_nos[$index];
 
-            // Update the guide's details in the 'tourguide' table
             $update_guide_query = "UPDATE tourguide SET name = ?, contact_no = ? WHERE guide_id = ?";
             $stmt_guide = $conn->prepare($update_guide_query);
             $stmt_guide->bind_param("ssi", $guide_name, $guide_contact_no, $tour_guides[$index]['guide_id']);
             $stmt_guide->execute();
         }
 
-        // If the tour update is successful, redirect back to the admin tour page
         header("Location: admin_tour.php?msg=Tour updated successfully");
         exit();
     } else {
@@ -78,10 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
-<!-- HTML Form remains the same -->
 
 
-<!-- HTML for displaying the edit form -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -136,8 +130,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <div class="form-group">
-                <label for="end_date">End Date:</label>
-                <input type="date" name="end_date" value="<?php echo htmlspecialchars($tour['end_date']); ?>" required>
+                <label for="tour_type">Tour Type:</label>
+                <select id="tour_type" name="tour_type" required>
+                    <option value="0" <?php echo $tour['is_exclusive'] == 0 ? 'selected' : ''; ?>>Regular Tour</option>
+                    <option value="1" <?php echo $tour['is_exclusive'] == 1 ? 'selected' : ''; ?>>Exclusive Tour</option>
+                </select>
+            </div>
+
+            <!-- Exclusive Fields (only show when Exclusive Tour is selected) -->
+            <div id="exclusiveFields" style="display: <?php echo $tour['is_exclusive'] == 1 ? 'block' : 'none'; ?>;">
+                <div class="form-group">
+                    <label for="min_bookings">Minimum Bookings (for exclusive tours):</label>
+                    <input type="number" name="min_bookings" value="<?php echo $tour['min_bookings']; ?>" required>
+                </div>
             </div>
 
             <div class="form-group">
@@ -155,7 +160,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <input type="number" name="max_bookings" value="<?php echo htmlspecialchars($tour['max_bookings']); ?>" required>
             </div>
 
-            <!-- Tour Guide Fields (Editable) -->
             <div id="guideFields">
                 <?php foreach ($tour_guides as $guide): ?>
                     <div class="form-group">

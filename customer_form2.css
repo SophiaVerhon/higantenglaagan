@@ -1,0 +1,331 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+
+.photo-preview-box div {
+    display: inline-block;
+    margin: 10px;
+    position: relative;
+}
+
+.photo-preview-box img {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.photo-preview-box button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.input-row {
+    display: flex;
+    gap: 20px; 
+}
+
+.input-row .inputbox {
+    flex: 1;
+}  
+
+/* Center the h2 horizontally */
+.logincreateh2 {
+    text-align: center; 
+    font-size: 30px; 
+    color: green;
+    margin-bottom: 20px;
+}
+
+
+/* Main container styling */
+.logincreateform-box {
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-top: 180px;
+    margin-bottom: 40px;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Styling for text and labels */
+.logincreateform-value {
+    color: green; /* Text inside the form */
+}
+
+.inputbox label {
+    color: green; /* Label text color */
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Input box styling */
+.inputbox input, 
+.inputbox select {
+    width: 100%; /* Full width for inputs */
+    padding: 10px;
+    margin-bottom: 20px; /* Space between inputs */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Prevent changing input text color */
+.inputbox input::placeholder,
+.inputbox input,
+.inputbox select {
+    color: initial; /* Keep default input text color */
+}
+
+/* Button styling */
+.submit-btn {
+    background-color: green; /* Button color */
+    color: white;
+    border: none;
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: darkgreen; /* Darker green on hover */
+}
+
+
+.TOURmain-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    padding: 20px 20px; 
+    background-color: #1E5F2D;
+    color: white;
+    height: 130px;
+    position: fixed;
+    top: 0; 
+    width: 100%; 
+    z-index: 1000;
+    box-shadow: 0px 25px 20px rgba(0, 0, 0, 0.3); 
+}
+
+.TOURheader-logo-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 10px;
+}
+
+.TOURheader-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.TOURlogo-image {
+    margin-top: 5px; 
+    margin-bottom: 0;
+    width: 60px;
+    height: 60px;
+}
+
+.TOURheader-navHP {
+    display: flex;
+    gap: 30px; 
+    margin-top: 50px;
+    align-items: center;
+}
+
+.TOURnav-linkHP {
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 10px 15px;
+    font-size: 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.TOURnav-linkHP:hover,
+.TOURnav-linkHP:active {
+    background-color: #EE5023;
+    color: white;
+}
+
+.TOURdropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.TOURdropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    background-color: #1E5F2D;
+    color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    z-index: 1000;
+    padding: 10px 0;
+    min-width: 200px;
+}
+
+.TOURdropdown-menu.show {
+    display: block;
+}
+
+.TOURdropdown-item {
+    display: block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.TOURdropdown-item:hover {
+    background-color: #1E5F2D;
+    color: #ffffff;
+}
+
+.TOURheader-nav {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.TOURnav-link.dropdown {
+    cursor: pointer;
+}
+
+.TOURdropdown-menu a {
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+}
+
+.TOURdropdown-menu a:hover {
+    background-color: #154a21;
+}
+
+.TOURdropdown:hover .dropdown-menu {
+    display: block; 
+}
+
+.TOURdropdown-toggle {
+    font-weight: bold;
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+
+
+.TOURfooter{
+    background-color: #1E5F2D;
+}
+.TOURfooterContainer{
+    width: 100%;
+    padding: 70px 30px 20px ;
+    background-color: #1E5F2D;
+}
+.TOURsocialIcons{
+    display: flex;
+    justify-content: center;
+}
+.TOURsocialIcons a{
+    text-decoration: none;
+    padding:  10px;
+    background-color: rgb(255, 255, 255);
+    margin: 10px;
+    border-radius: 100%;
+}
+.TOURsocialIcons a i{
+    font-size: 2em;
+    color: #1E5F2D;
+    opacity: 1;
+}
+
+.TOURsocialIcons a:hover{
+    background-color: #ff3700;
+    transition: 0.5s;
+}
+.TOURsocialIcons a:hover i{
+    color: #ff3700;
+    transition: 0.5s;
+}
+.TOURfooterNav{
+    margin: 30px 0;
+}
+.TOURfooterNav ul{
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+}
+.TOURfooterNav ul li a{
+    color: #ffffff;
+    margin: 20px;
+    text-decoration: none;
+    font-size: 1.3em;
+    opacity: 1;
+    transition: 0.5s;
+}
+.TOURfooterNav ul li a:hover{
+    opacity: 1;
+    color: #ff3700;
+}
+.TOURfooterBottom{
+    background-color: #1E5F2D;
+    padding: 20px;
+    text-align: center;
+}
+.TOURfooterBottom p{
+    color: rgb(255, 255, 255);
+}
+.TOURdesigner{
+    opacity: 1;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 400;
+    font-size: 20px;
+    color: #ffffff;
+    margin: 0px 5px;
+}
+
+
+@media (max-width: 480px) {
+    .TOURheader-text {
+        font-size: 15px; 
+    }
+    .TOURheader-navHP {
+        gap: 15px; /* Adjust spacing between navigation links */
+    }
+    .TOURnav-linkHP {
+        font-size: 13px; /* Smaller font size for nav links */
+    }
+}

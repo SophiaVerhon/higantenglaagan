@@ -1,5 +1,5 @@
-<?php 
-   session_start();
+<?php  
+session_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,26 +14,35 @@
     <div class="container">
         <div class="box form-box">
         <?php 
-            include("php/config.php");
-            if(isset($_POST['submit'])){
+            include("config.php"); // Include database configuration file
+            if (isset($_POST['submit'])) {
                 $username = $_POST['username'];
                 $email = $_POST['email'];
                 $password = $_POST['password'];
 
-                $verify_query = mysqli_query($con,"SELECT Email FROM users WHERE Email='$email'");
-
-                if(mysqli_num_rows($verify_query) != 0 ){
+                // Check if the email is already registered
+                $verify_query = mysqli_query($con, "SELECT Email FROM users WHERE Email='$email'");
+                if (mysqli_num_rows($verify_query) != 0) {
                     echo "<div class='message'>
-                            <p>This email is used, Try another One Please!</p>
+                            <p>This email is already registered. Please use another one!</p>
                           </div> <br>";
                     echo "<a href='javascript:self.history.back()'><button class='btn'>Go Back</button>";
                 } else {
-                    mysqli_query($con,"INSERT INTO users(Username,Email,Password) VALUES('$username','$email','$password')") or die("Error Occurred");
+                    // Hash the password before saving
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                    echo "<div class='message'>
-                            <p>Registration successful!</p>
-                          </div> <br>";
-                    echo "<a href='login.php'><button class='btn'>Login Now</button>";
+                    // Insert the new user into the database
+                    $insert_query = "INSERT INTO users (Username, Email, Password) VALUES ('$username', '$email', '$hashed_password')";
+                    if (mysqli_query($con, $insert_query)) {
+                        echo "<div class='message'>
+                                <p>Registration successful!</p>
+                              </div> <br>";
+                        echo "<a href='login.php'><button class='btn'>Login Now</button>";
+                    } else {
+                        echo "<div class='message'>
+                                <p>There was an error. Please try again later.</p>
+                              </div> <br>";
+                    }
                 }
             } else {  
         ?>
@@ -55,7 +64,7 @@
                 </div>
 
                 <div class="field">
-                    <input type="submit" class="btn" name="submit" value="Register" required>
+                    <input type="submit" class="btn" name="submit" value="Register">
                 </div>
                 <div class="links">
                     Already a member? <a href="login.php">Sign In</a>

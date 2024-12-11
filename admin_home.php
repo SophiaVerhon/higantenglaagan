@@ -3,12 +3,11 @@ session_start();
 include("db_connect.php"); 
 $currency_symbol = "₱";
 
-// Fetch most popular tours
 $sql = "
     SELECT t.tour_id, t.tour_name, t.image_path, t.price_per_person, COUNT(b.booking_id) AS booking_count
     FROM tour t
     LEFT JOIN booking b ON t.tour_id = b.tour_id
-    WHERE t.start_date > NOW()  -- Only upcoming tours
+    WHERE t.start_date > NOW()  
     GROUP BY t.tour_id
     ORDER BY booking_count DESC
     LIMIT 4;
@@ -20,11 +19,10 @@ if ($result && $result->num_rows > 0) {
     $popular_tours = $result->fetch_all(MYSQLI_ASSOC);
 }
 
-// Fetch upcoming tours
 $upcoming_query = "
     SELECT t.tour_id, t.tour_name, t.description, t.start_date, t.end_date, t.price_per_person, t.location, t.image_path 
     FROM tour t
-    WHERE t.start_date > NOW()  -- Only upcoming tours
+    WHERE t.start_date > NOW()  
     ORDER BY t.start_date ASC
     LIMIT 4"; 
 $upcoming_result = $conn->query($upcoming_query);
@@ -49,10 +47,10 @@ $upcoming_result = $conn->query($upcoming_query);
             <nav class="header-navHP">
                 <a href="#" class="nav-linkHP">MOST POPULAR</a>
                 <a href="admin_tour.php" class="nav-linkHP">ALL TOURS</a>
-                <a href="#tours" class="nav-linkHP">SEARCH</a>
                 <a href="#about-us-footer" class="nav-linkHP">ABOUT US</a>
-                <a href="tour_add.php" class="nav-linkHP">+Add New Tour</a>
-                <a href="logout.php " class="nav-linkHP">Logout</a>
+                <a href="tour_add.php" class="nav-linkHP">+ADD NEW TOUR</a>
+                <a href="admin_dashboard.php" class="nav-linkHP">DASHBOARD</a>
+                <a href="logout.php " class="nav-linkHP">LOGOUT</a>
                 
                 
             </nav>
@@ -128,7 +126,6 @@ $upcoming_result = $conn->query($upcoming_query);
             </div>
         </section>
 
-        <!-- All Upcoming Tours Section -->
         <section id="tours" class="tours-section2">
     <div class="section-header">
         <div class="left-header">
@@ -153,7 +150,6 @@ $upcoming_result = $conn->query($upcoming_query);
     </div>
     <div class="scroll-container">
         <?php
-        // Updated query to fetch only upcoming tours (start_date > NOW())
         $allToursQuery = "
             SELECT t.tour_id, t.tour_name, t.description, t.start_date, t.end_date, t.price_per_person, t.location, t.image_path
             FROM tour t
@@ -208,7 +204,6 @@ $upcoming_result = $conn->query($upcoming_query);
 
     </div>
 
-    <!-- JavaScript for dropdown -->
     <script>
         function toggleDropdown(id) {
             var dropdown = document.getElementById(id);

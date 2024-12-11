@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <h1>Select Tour Type</h1>
         </header>
 
-        <!-- Buttons for selecting tour type -->
+        <!-- Form with buttons to choose tour type -->
         <form action="touroption.php" method="POST">
             <button type="submit" name="tour_type" value="0" class="tour-button">Regular Tour</button>
             <button type="submit" name="tour_type" value="1" class="tour-button">Exclusive Tour</button>

@@ -1,82 +1,81 @@
-<?php 
-   session_start();
+<?php
+session_start();
+include('../db_connect.php');
+$error_message = ''; // To store error messages
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    $query = "SELECT user_id, password FROM users WHERE email = ?";
+    if ($stmt = $conn->prepare($query)) {
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($user_id, $hashed_password);
+            $stmt->fetch();
+
+            if (password_verify($password, $hashed_password)) {
+                $_SESSION['user_id'] = $user_id;
+                header("Location: home.php"); // Redirect to homepage
+                exit();
+            } else {
+                $error_message = "Invalid password.";
+            }
+        } else {
+            $error_message = "No account found with that email.";
+        }
+        $stmt->close();
+    } else {
+        $error_message = "Database query failed.";
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style/style.css">
-    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+    <title>Login Page</title>
 </head>
-<body class="form-page">
-    <div class="container">
-        <div class="box form-box">
-            <?php 
-              include("php/config.php");
-
-              // Initialize error modal as hidden
-              $showErrorModal = false;
-
-              // Check if the form was submitted
-              if(isset($_POST['submit'])){
-                $email = mysqli_real_escape_string($con, $_POST['email']);
-                $password = mysqli_real_escape_string($con, $_POST['password']);
-
-                $result = mysqli_query($con, "SELECT * FROM users WHERE Email='$email' AND Password='$password'") or die("Select Error");
-                $row = mysqli_fetch_assoc($result);
-
-                if(is_array($row) && !empty($row)){
-                    $_SESSION['valid'] = $row['Email'];
-                    $_SESSION['username'] = $row['Username'];
-                    $_SESSION['age'] = $row['Age'];
-                    $_SESSION['id'] = $row['Id'];
-                    header("Location: home.php"); // Redirect if login is successful
-                    exit; // Add exit after the redirect
-                } else {
-                    // Show error modal only if login attempt failed
-                    $showErrorModal = true;
-                }
-              }
-            ?>
-            
-            <header>Login to Continue</header>
-            <form action="" method="post">
-                <div class="field input">
-                    <label for="email">Email</label>
-                    <input type="text" name="email" id="email" autocomplete="off" required>
-                </div>
-
-                <div class="field input">
-                    <label for="password">Password</label>
-                    <input type="password" name="password" id="password" autocomplete="off" required>
-                </div>
-
-                <div class="field">
-                    <input type="submit" class="btn" name="submit" value="Login" required>
-                </div>
-                <div class="links">
-                    Don't have an account? <a href="register.php">Sign Up Now</a>
-                </div>
-            </form>
+<body>
+<div class="loginbackground" style="background-image: url('image/bgforest1.jpg'); background-size: cover;">
+    <header class="TOURmain-header">
+        <div class="TOURheader-logo-text">
+            <img src="image/logo.png" alt="Logo" class="TOURlogo-image">
+            <span class="TOURheader-text">Higanteng Laagan Travel & Tours</span>
         </div>
-    </div>
-
-    <!-- Error Modal -->
-    <?php if($showErrorModal): ?>
-    <div class="modal" id="errorModal" style="display: flex;">
-        <div class="modal-content">
-            <p>Wrong Username or Password</p>
-            <button class="close-btn" onclick="closeModal()">Close</button>
+    </header>
+    <section>
+        <div class="logincreateform-box">
+            <div class="logincreateform-value">
+                <form action="login.php" method="POST">
+                    <h2 class="logincreateh2">Login to continue</h2>
+                    <?php if (!empty($error_message)) : ?>
+                        <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
+                    <?php endif; ?>
+                    <div class="inputbox">
+                        <input type="email" name="email" required>
+                        <label>Email</label>
+                    </div>
+                    <div class="inputbox">
+                        <input type="password" name="password" required>
+                        <label>Password</label>
+                    </div>
+                    <div class="forget">
+                        <label><input type="checkbox" name="remember"> Remember Me</label>
+                        <a href="#">Forgot Password</a>
+                    </div>
+                    <button type="submit" class="logincreatebutton">Log in</button>
+                    <div class="register">
+                        <p>Don't have an account? <a href="register.php">Register</a></p>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-    <?php endif; ?>
-
-    <script>
-        function closeModal() {
-            document.getElementById('errorModal').style.display = 'none';
-        }
-    </script>
+    </section>
 </body>
 </html>

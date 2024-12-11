@@ -6,14 +6,13 @@ session_start();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/about.css">
+  <link rel="stylesheet" href="aboutus.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
   <title>About Us</title>
 </head>
 <body class="tour">
-    
 
 <header class="TOURmain-header">
   <div class="TOURheader-logo-text">
@@ -21,16 +20,13 @@ session_start();
     <span class="TOURheader-text">Higanteng Laagan Travel & Tours</span>
   </div>
   <nav class="TOURheader-navHP">
-                
-                <a href="admin_home.php"class="TOURnav-linkHP">HOME</a>
-                <a href="admin_tour.php"class="TOURnav-linkHP">TOURS</a>
-                <a href="admin_about.php"class="TOURnav-linkHP">ABOUT US</a>
-                <a href="review.php"class="TOURnav-linkHP">REVIEW</a>
-                <a href="tour_add.php"class="TOURnav-linkHP">+ ADD NEW TOUR</a>
-                <a href="admin_dashboard.php"class="TOURnav-linkHP">DASHBOARD</a>
-                <div class="TOURnav-linkHP"><a href="logout.php" class="logout-button">LOGOUT</a></div>
-</div>
-               
+                <a href="home.php" class="TOURnav-linkHP">GO BACK TO HOMEPAGE</a>
+    <div class="TOURdropdown">
+      <span class="TOURnav-linkHP dropdown-toggle" onclick="toggleDropdown('profile-dropdown')">MY PROFILE</span>
+      <div id="profile-dropdown" class="TOURdropdown-menu">
+        <a href="profile.php" class="TOURdropdown-item">My Account</a>
+        <a href="bkstatus.php" class="TOURdropdown-item">Booking Status</a>
+        <a href="index.php" class="TOURdropdown-item">Log Out</a>
       </div>
     </div>
   </nav>
@@ -82,7 +78,7 @@ session_start();
                 </div>
                 <div class="TOURfooterNav">
                     <ul>
-                        <li><a href="admin_home.php">Home</a></li>
+                        <li><a href="hompage.php">Home</a></li>
                         <li><a href="">About Us</a></li>
                         <li><a href="">Contact</a></li>
                     </ul>
@@ -94,7 +90,32 @@ session_start();
             </div>
         </footer>
 
+<!-- JavaScript for dropdown -->
+<script>
+    function toggleDropdown(menuId) {
+    const dropdown = document.getElementById(menuId);
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
 
+// Close dropdown if clicked outside
+    window.onclick = function (event) {
+        if (!event.target.matches('.dropdown-toggle')) {
+            const dropdowns = document.querySelectorAll('.dropdown-menu');
+            dropdowns.forEach(dropdown => {
+            dropdown.style.display = 'none';
+            });
+            }
+        }
+
+  function editAccount() {
+    window.location.href = 'edit-account.php';
+  }
+
+  function deleteAccount() {
+    if (confirm('Are you sure you want to delete your account?')) {
+      window.location.href = 'delete-account.php';
+    }
+  }
 </script>
 </body>
 </html>

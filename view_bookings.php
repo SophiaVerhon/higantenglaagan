@@ -82,11 +82,19 @@ if ($stmt = $conn->prepare($query)) {
                             <?php echo htmlspecialchars($row['booking_date']); ?>
                         </div>
                         <div class="table-column">
-                            <?php if (!empty($row['valid_id_path'])): ?>
-                                <img src="<?php echo htmlspecialchars($row['valid_id_path']); ?>" alt="Valid ID" class="valid-id-img">
-                            <?php else: ?>
-                                <span>No ID Provided</span>
-                            <?php endif; ?>
+                            <?php 
+                            // Check if there is a valid ID and display it
+                            if (!empty($row['valid_id_path'])):
+                                // Convert the LONGBLOB binary data to base64 for display
+                                $imageData = $row['valid_id_path'];
+                                $base64Image = base64_encode($imageData);
+                                // Display the image as base64
+                                echo '<img src="data:image/jpeg;base64,' . $base64Image . '" alt="Valid ID" class="valid-id-img" />';
+                            else:
+                                // Display default message or image if no valid ID is provided
+                                echo '<span>No ID Provided</span>';
+                            endif;
+                            ?>
                         </div>
                     </div>
                 <?php endwhile; ?>

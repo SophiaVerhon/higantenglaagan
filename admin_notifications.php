@@ -44,17 +44,26 @@ $result = $conn->query($notifications_query);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Notifications</title>
-    <link rel="stylesheet" href="css/admindb.css">
+    <link rel="stylesheet" href="css/admindashb.css">
 </head>
-<body>
-<div class="navbar">
-    <a href="admin_home.php">Home</a>
-    <a href="admin_tour.php">Tours</a>
-    <a href="admin_about.php">About Us</a>
-    <a href="admin_dashboard.php">Dashboard</a>
-    <a href="logout.php" class="logout-button">Logout</a>
-</div>
-
+<body class="admin">
+    <div class="main-container">
+        <header class="main-header">
+            <div class="header-logo-text">
+                <img src="image/logo.png" alt="Logo" class="logo-image">
+                <span class="header-text">Higanteng Laagan Travel & Tours</span>
+            </div>
+            <nav class="header-navHP">
+                <a href="admin_home.php" class="nav-linkHP">HOME </a>
+                <a href="admin_tour.php" class="nav-linkHP">TOURS</a>
+                <a href="tour_add.php" class="nav-linkHP">+ADD NEW TOURS</a>
+                <a href="admin_about.php" class="nav-linkHP">ABOUT US</a>
+                <a href="review.php" class="nav-linkHP">REVIEW</a>
+                <a href="admin_dashboard.php" class="nav-linkHP">DASHBOARD</a>
+                <a href="logout.php" class="logout-button">LOGOUT</a>
+                <!-- Notifications Badge in Navbar -->
+            </nav>
+        </header>
 <div class="container">
     <h2>Notifications</h2>
     <a href="admin_notifications.php?mark_all_read=true" class="mark-read-btn">Mark All as Read</a>
