@@ -48,11 +48,11 @@ $conn->close();
                 <span class="header-text">Higanteng Laagan Travel & Tours</span>
             </div>
             <nav class="header-navHP">
-                <a href="admin_home.php" class="nav-linkHP">HOME </a>
                 <a href="admin_tour.php" class="nav-linkHP">TOURS</a>
                 <a href="tour_add.php" class="nav-linkHP">+ADD NEW TOURS</a>
                 <a href="admin_about.php" class="nav-linkHP">ABOUT US</a>
                 <a href="review.php" class="nav-linkHP">REVIEW</a>
+                <a href="admin_notifications.php" class="nav-linkHP">NOTIFICATION</a>
                 <a href="admin_dashboard.php" class="nav-linkHP">DASHBOARD</a>
                 <a href="logout.php" class="logout-button">LOGOUT</a>
                 <a href="admin_notifications.php" class="notification-badge">
@@ -92,23 +92,7 @@ $conn->close();
                     <p><?php echo $total_tours; ?></p>
                 </div>
 
-                <div class="dashboard-card">
-                    <h3>Payment List</h3>
-                    <?php if ($payment_result->num_rows > 0): ?>
-                        <div class="payment-list">
-                            <ul>
-                                <?php while ($payment = $payment_result->fetch_assoc()): ?>
-                                    <li>
-                                        <p>Payment ID: <?php echo $payment['payment_id']; ?> | Customer ID: <?php echo $payment['customer_id']; ?> | Amount: $<?php echo number_format($payment['amount'], 2); ?> | Date: <?php echo $payment['payment_date']; ?> | Status: <?php echo ucfirst($payment['status']); ?></p>
-                                    </li>
-                                <?php endwhile; ?>
-                            </ul>
-                        </div>
-                    <?php else: ?>
-                        <p>No payments found.</p>
-                    <?php endif; ?>
-                    <a href="admin_payments.php" class="view-customers-btn">View All Payments</a>
-                </div>
+                
             </div>
         </div>
 

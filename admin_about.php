@@ -22,7 +22,6 @@ session_start();
   </div>
   <nav class="TOURheader-navHP">
                 
-                <a href="admin_home.php"class="TOURnav-linkHP">HOME</a>
                 <a href="admin_tour.php"class="TOURnav-linkHP">TOURS</a>
                 <a href="admin_about.php"class="TOURnav-linkHP">ABOUT US</a>
                 <a href="review.php"class="TOURnav-linkHP">REVIEW</a>

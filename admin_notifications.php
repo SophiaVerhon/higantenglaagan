@@ -44,7 +44,7 @@ $result = $conn->query($notifications_query);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Notifications</title>
-    <link rel="stylesheet" href="css/admindashb.css">
+    <link rel="stylesheet" href="css/notification.css">
 </head>
 <body class="admin">
     <div class="main-container">
@@ -54,7 +54,6 @@ $result = $conn->query($notifications_query);
                 <span class="header-text">Higanteng Laagan Travel & Tours</span>
             </div>
             <nav class="header-navHP">
-                <a href="admin_home.php" class="nav-linkHP">HOME </a>
                 <a href="admin_tour.php" class="nav-linkHP">TOURS</a>
                 <a href="tour_add.php" class="nav-linkHP">+ADD NEW TOURS</a>
                 <a href="admin_about.php" class="nav-linkHP">ABOUT US</a>

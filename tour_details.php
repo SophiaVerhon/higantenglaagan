@@ -29,8 +29,11 @@ $currency_symbol = "₱";
 $description = $tour['description'];
 
 // Clean up the description and separate each section
-$description_cleaned = preg_replace('/#(Itinerary|Inclusions|Exclusions|Cancellation Policy)#/', '<h2 class="TOURdiv-title">$1</h2>', $description);
+$description_cleaned = preg_replace('/#(Note|Itinerary|Inclusions|Exclusions|Cancellation Policy)#/', '<h2 class="TOURdiv-title">$1</h2>', $description);
 $description_cleaned = nl2br($description_cleaned);
+
+// Check if the user is logged in as admin
+$is_admin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 
 ?>
 
@@ -84,18 +87,21 @@ $description_cleaned = nl2br($description_cleaned);
                 <p><strong>End Date:</strong> <?php echo htmlspecialchars(date('F j, Y', strtotime($tour['end_date']))); ?></p>
             </div>
 
-            <div class="tour-rectangle" id="booknow">
-                <div class="price-area">
-                    <p class="price"><?php echo $currency_symbol . htmlspecialchars($tour['price_per_person']); ?></p>
-                </div>
+            <?php if (!$is_admin): ?>
+                <!-- Only show the Book Now button if the user is not an admin -->
+                <div class="tour-rectangle" id="booknow">
+                    <div class="price-area">
+                        <p class="price"><?php echo $currency_symbol . htmlspecialchars($tour['price_per_person']); ?></p>
+                    </div>
 
-                <div class="orangebutton-container">
-                    <form action="customer_form.php" method="get">
-                        <input type="hidden" name="tour_id" value="<?php echo htmlspecialchars($tour_id); ?>">
-                        <button type="submit" class="orange-button"><b>BOOK NOW</b></button>
-                    </form>
+                    <div class="orangebutton-container">
+                        <form action="customer_form.php" method="get">
+                            <input type="hidden" name="tour_id" value="<?php echo htmlspecialchars($tour_id); ?>">
+                            <button type="submit" class="orange-button"><b>BOOK NOW</b></button>
+                        </form>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
         </div>
 
         <footer id="about-us-footer">

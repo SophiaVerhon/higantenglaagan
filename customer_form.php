@@ -14,19 +14,36 @@ if (!isset($_GET['tour_id'])) {
 }
 $tour_id = $_GET['tour_id'];
 
-$tour_query = "SELECT tour_name FROM tour WHERE tour_id = ?";
+// Fetch the tour details and max bookings
+$tour_query = "SELECT tour_name, max_bookings FROM tour WHERE tour_id = ?";
 $stmt_tour = $conn->prepare($tour_query);
 $stmt_tour->bind_param("i", $tour_id);
 $stmt_tour->execute();
 $stmt_tour->store_result();
-$stmt_tour->bind_result($tour_name);
+$stmt_tour->bind_result($tour_name, $max_bookings);
 $stmt_tour->fetch();
 $stmt_tour->close();
+
+// Get current number of bookings for this tour
+$booking_count_query = "SELECT COUNT(*) FROM booking WHERE tour_id = ?";
+$stmt_booking_count = $conn->prepare($booking_count_query);
+$stmt_booking_count->bind_param("i", $tour_id);
+$stmt_booking_count->execute();
+$stmt_booking_count->bind_result($current_booking_count);
+$stmt_booking_count->fetch();
+$stmt_booking_count->close();
+
+// Check if the max bookings limit has been reached
+if ($current_booking_count >= $max_bookings) {
+    $message = "Sorry, this tour has already reached the maximum number of bookings.";
+    // Prevent further processing if max bookings are reached
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->begin_transaction();
     try {
-
+        // Collect customer details
         $name = $_POST['name'];
         $email = $_POST['email'];
         $phone = $_POST['phone_no'];
@@ -41,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $valid_id_path = $file_data; // Store the file's binary data
         }
 
+        // Insert the customer data into the customer table
         $customer_query = "INSERT INTO customer (name, email, phone_no, age, address, valid_id_path, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt_customer = $conn->prepare($customer_query);
         $stmt_customer->bind_param("sssissi", $name, $email, $phone, $age, $address, $valid_id_path, $user_id);
@@ -48,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt_customer->execute()) {
             $customer_id = $stmt_customer->insert_id;
 
+            // Insert booking for the main customer
             $booking_query = "INSERT INTO booking (customer_id, tour_id, user_id, booking_date) VALUES (?, ?, ?, NOW())";
             $stmt_booking = $conn->prepare($booking_query);
             $stmt_booking->bind_param("iii", $customer_id, $tour_id, $user_id);
@@ -56,14 +75,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 throw new Exception("Error adding booking for main customer.");
             }
 
+            // Collect payment details if provided
+            if (isset($_POST['ref_number']) && !empty($_POST['ref_number'])) {
+                $reference_no = $_POST['ref_number'];
+                $payment_upload = null;
+                if (isset($_FILES['payment_upload']) && $_FILES['payment_upload']['error'] === UPLOAD_ERR_OK) {
+                    $payment_upload = file_get_contents($_FILES['payment_upload']['tmp_name']); // Store the uploaded image
+                }
+
+                $amount_paid = $_POST['amount_paid']; // Assuming this is part of the form
+
+                // Insert payment details into the payment table
+                $payment_query = "INSERT INTO payment (booking_id, date, reference_no, payment_proof, amount_paid) VALUES (?, NOW(), ?, ?, ?)";
+                $stmt_payment = $conn->prepare($payment_query);
+                $stmt_payment->bind_param("issi", $customer_id, $reference_no, $payment_upload, $amount_paid);
+
+                if (!$stmt_payment->execute()) {
+                    throw new Exception("Error adding payment details.");
+                }
+            }
+
             $notification_message = "New Booking: $name has booked for $tour_name.";
             $notification_query = "INSERT INTO notifications (message) VALUES (?)";
             $stmt_notification = $conn->prepare($notification_query);
             $stmt_notification->bind_param("s", $notification_message);
             $stmt_notification->execute();
 
+            // If adventurers are added
             if (isset($_POST['adventurer_name']) && is_array($_POST['adventurer_name'])) {
                 for ($i = 0; $i < count($_POST['adventurer_name']); $i++) {
+                    // Check if adding this adventurer would exceed max bookings
+                    if ($current_booking_count + 1 > $max_bookings) {
+                        throw new Exception("Adding more adventurers exceeds the maximum booking limit.");
+                    }
+
                     $additional_name = $_POST['adventurer_name'][$i];
                     $additional_email = $_POST['adventurer_emails'][$i];
                     $additional_phone = $_POST['adventurer_phones'][$i];
@@ -72,38 +117,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $additional_valid_id = null;
 
                     if (isset($_FILES['adventurer_valid_id']) && $_FILES['adventurer_valid_id']['error'][$i] === UPLOAD_ERR_OK) {
-                        $file_data = file_get_contents($_FILES['adventurer_valid_id']['tmp_name'][$i]); // Get binary content
-                        $additional_valid_id = $file_data; // Store the file's binary data
+                        $file_data = file_get_contents($_FILES['adventurer_valid_id']['tmp_name'][$i]);
+                        $additional_valid_id = $file_data;
                     }
 
+                    // Insert additional adventurer
                     $stmt_additional = $conn->prepare("INSERT INTO customer (name, email, phone_no, age, address, valid_id_path, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     $stmt_additional->bind_param("sssissi", $additional_name, $additional_email, $additional_phone, $additional_age, $additional_address, $additional_valid_id, $user_id);
 
                     if ($stmt_additional->execute()) {
                         $additional_customer_id = $stmt_additional->insert_id;
 
+                        // Insert booking for the adventurer
                         $stmt_additional_booking = $conn->prepare("INSERT INTO booking (customer_id, tour_id, user_id, booking_date) VALUES (?, ?, ?, NOW())");
-                        $stmt_additional_booking->bind_param("iii", $additional_customer_id, $tour_id, $user_id);  // Added user_id
+                        $stmt_additional_booking->bind_param("iii", $additional_customer_id, $tour_id, $user_id);
 
                         if (!$stmt_additional_booking->execute()) {
                             throw new Exception("Error adding booking for adventurer $additional_name.");
                         }
-                        $notification_message = "New Booking: $additional_name has booked for $tour_name.";
-                        $stmt_notification = $conn->prepare($notification_query);
-                        $stmt_notification->bind_param("s", $notification_message);
-                        $stmt_notification->execute();
-
-                        $stmt_additional_booking->close();
                     } else {
                         throw new Exception("Error adding adventurer: " . $stmt_additional->error);
                     }
-
                     $stmt_additional->close();
                 }
             }
 
             $conn->commit();
-
             header("Location: users/home.php");
             exit();
         } else {
@@ -115,36 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-if (isset($_GET['tour_id'])) {
-    $tour_id = $_GET['tour_id'];
-
-    $check_bookings_query = "SELECT max_bookings, 
-                                    (SELECT COUNT(*) FROM booking WHERE tour_id = ?) AS current_bookings
-                             FROM tour 
-                             WHERE tour_id = ?";
-    $stmt = $conn->prepare($check_bookings_query);
-    $stmt->bind_param("ii", $tour_id, $tour_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $tour = $result->fetch_assoc();
-
-    if ($tour) {
-        $max_bookings = $tour['max_bookings'];
-        $current_bookings = $tour['current_bookings'];
-
-        if ($max_bookings > 0 && $current_bookings >= $max_bookings) {
-            $is_fully_booked = true;
-        } else {
-            $is_fully_booked = false;
-        }
-    } else {
-        die("Tour not found.");
-    }
-}
 $conn->close();
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -227,7 +238,34 @@ $conn->close();
                 <div id="adventurer-fields">
                 </div>
 
-                 <button type="submit" name="book_tour" class="submit-btn">Book Now</button>
+                <button type="button" class="submit-btn" onclick="togglePaymentSection()">Proceed to Payment</button>
+    <div id="payment-section" class="collapsible-content" style="display: none;">
+        <div class="inputbox">
+            <label for="ref_number">GCASH Reference Number (Required)</label>
+            <input type="text" id="ref_number" name="ref_number" required>
+        </div>
+
+        <div class="inputbox">
+            <label for="payment_upload">Upload Payment Proof (Optional)</label>
+            <input type="file" id="payment_upload" name="payment_upload" accept="image/*">
+        </div>
+
+        <div class="inputbox">
+            <label for="amount_paid">Amount Paid (Required)</label>
+            <input type="number" id="amount_paid" name="amount_paid" required>
+        </div>
+
+        <button type="submit" name="book_tour" class="submit-btn">Book Now</button>
+    </div>
+</form>
+
+<script>
+    // Toggle payment section visibility
+    function togglePaymentSection() {
+        const paymentSection = document.getElementById('payment-section');
+        paymentSection.style.display = (paymentSection.style.display === 'none' || paymentSection.style.display === '') ? 'block' : 'none';
+    }
+</script>
             </form>
         </div>
     </div>

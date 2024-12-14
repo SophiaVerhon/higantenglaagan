@@ -80,11 +80,12 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                 <span class="header-text">Higanteng Laagan Travel & Tours</span>
             </div>
             <nav class="header-navHP">
-                <a href="admin_home.php" class="nav-linkHP">HOME </a>
                 <a href="admin_tour.php" class="nav-linkHP">TOURS</a>
                 <a href="tour_add.php" class="nav-linkHP">+ADD NEW TOURS</a>
                 <a href="admin_about.php" class="nav-linkHP">ABOUT US</a>
                 <a href="review.php" class="nav-linkHP">REVIEW</a>
+                <a href="admin_notifications.php" class="nav-linkHP">NOTIFICATION</a>
+
                 <a href="admin_dashboard.php" class="nav-linkHP">DASHBOARD</a>
                 <a href="logout.php" class="logout-button">LOGOUT</a>
                 <!-- Notifications Badge in Navbar -->

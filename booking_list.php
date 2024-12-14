@@ -2,7 +2,6 @@
 include('db_connect.php');
 session_start();
 
-// Check if admin is logged in
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header("Location: admin_log.php");
     exit();
@@ -14,10 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $payment_status = $_POST['payment_status'];
     $total_payment = $_POST['total_payment'];
 
-    
+
     $booking_date = date('Y-m-d');
 
-   
+
     $query = "INSERT INTO booking (customer_id, tour_id, booking_date, payment_status,) 
               VALUES (?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
@@ -39,7 +38,6 @@ $customers_result = $conn->query($customers_query);
 $tours_query = "SELECT tour_id, tour_name FROM tour";
 $tours_result = $conn->query($tours_query);
 
-// Fetch all bookings to display
 $bookings_query = "SELECT b.booking_id, c.name as customer_name, t.tour_name, b.booking_date, b.payment_status
                    FROM booking b
                    JOIN customer c ON b.customer_id = c.customer_id
