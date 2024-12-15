@@ -14,15 +14,22 @@ if (!isset($_GET['tour_id'])) {
 }
 $tour_id = $_GET['tour_id'];
 
-// Fetch the tour details and max bookings
-$tour_query = "SELECT tour_name, max_bookings FROM tour WHERE tour_id = ?";
+// Fetch the tour details including exclusive flag, min_bookings, max_bookings
+$tour_query = "SELECT tour_name, max_bookings, min_bookings, is_exclusive FROM tour WHERE tour_id = ?";
 $stmt_tour = $conn->prepare($tour_query);
 $stmt_tour->bind_param("i", $tour_id);
 $stmt_tour->execute();
 $stmt_tour->store_result();
-$stmt_tour->bind_result($tour_name, $max_bookings);
+$stmt_tour->bind_result($tour_name, $max_bookings, $min_bookings, $isExclusive);
 $stmt_tour->fetch();
 $stmt_tour->close();
+
+// For exclusive tours, ensure the form has enough fields for min_bookings
+if ($isExclusive && $min_bookings > 0) {
+    $num_adventurers = $min_bookings - 1; // Subtract 1 for the main customer
+} else {
+    $num_adventurers = 0; // No default adventurers for non-exclusive tours
+}
 
 // Get current number of bookings for this tour
 $booking_count_query = "SELECT COUNT(*) FROM booking WHERE tour_id = ?";
@@ -33,12 +40,19 @@ $stmt_booking_count->bind_result($current_booking_count);
 $stmt_booking_count->fetch();
 $stmt_booking_count->close();
 
-// Check if the max bookings limit has been reached
-if ($current_booking_count >= $max_bookings) {
+// Calculate available slots for max bookings (excluding the main customer)
+$availableSlots = max(0, $max_bookings - 1 - $current_booking_count);
+
+if ($max_bookings > 0 && $current_booking_count >= $max_bookings) {
     $message = "Sorry, this tour has already reached the maximum number of bookings.";
-    // Prevent further processing if max bookings are reached
     exit();
 }
+
+// If max_bookings is NULL or 0, proceed with open bookings
+if ($max_bookings === NULL || $max_bookings === 0) {
+    // Open slots for booking (no restriction)
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->begin_transaction();
@@ -54,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Handle file upload for the main customer (LONGBLOB storage)
         if (isset($_FILES['valid_id_path']) && $_FILES['valid_id_path']['error'] === UPLOAD_ERR_OK) {
             $file_name = $_FILES['valid_id_path']['name'];
-            $file_data = file_get_contents($_FILES['valid_id_path']['tmp_name']); 
+            $file_data = file_get_contents($_FILES['valid_id_path']['tmp_name']);
             $valid_id_path = $file_data; // Store the file's binary data
         }
 
@@ -75,6 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 throw new Exception("Error adding booking for main customer.");
             }
 
+            // Update the current booking count after adding the main customer
+            $current_booking_count++;
             // Collect payment details if provided
             if (isset($_POST['ref_number']) && !empty($_POST['ref_number'])) {
                 $reference_no = $_POST['ref_number'];
@@ -101,13 +117,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt_notification->bind_param("s", $notification_message);
             $stmt_notification->execute();
 
-            // If adventurers are added
-            if (isset($_POST['adventurer_name']) && is_array($_POST['adventurer_name'])) {
-                for ($i = 0; $i < count($_POST['adventurer_name']); $i++) {
-                    // Check if adding this adventurer would exceed max bookings
-                    if ($current_booking_count + 1 > $max_bookings) {
-                        throw new Exception("Adding more adventurers exceeds the maximum booking limit.");
-                    }
+            // Handle additional adventurers
+           // Handling adventurers' bookings
+                if (isset($_POST['adventurer_name']) && is_array($_POST['adventurer_name'])) {
+                    for ($i = 0; $i < count($_POST['adventurer_name']); $i++) {
+                        // Check if adding this adventurer exceeds the max booking limit
+                        if ($totalAdventurers + 1 > $availableSlots) {  // +1 for the main customer
+                            throw new Exception("You cannot add more adventurers than available slots.");
+                        }
 
                     $additional_name = $_POST['adventurer_name'][$i];
                     $additional_email = $_POST['adventurer_emails'][$i];
@@ -135,10 +152,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         if (!$stmt_additional_booking->execute()) {
                             throw new Exception("Error adding booking for adventurer $additional_name.");
                         }
+
+                        // Update the booking count after adding an adventurer
+                        $current_booking_count++;
                     } else {
                         throw new Exception("Error adding adventurer: " . $stmt_additional->error);
                     }
-                    $stmt_additional->close();
+
+                    $notification_message = "New Booking: $additional_name has booked for $tour_name.";
+                    $stmt_notification = $conn->prepare($notification_query);
+                    $stmt_notification->bind_param("s", $notification_message);
+                    $stmt_notification->execute();
                 }
             }
 
@@ -149,13 +173,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             throw new Exception("Error adding main customer: " . $stmt_customer->error);
         }
     } catch (Exception $e) {
-        $conn->rollback(); 
+        $conn->rollback();
         $message = $e->getMessage();
     }
 }
 
 $conn->close();
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -232,31 +259,38 @@ $conn->close();
                 <h2>Adventurers</h2>
                 <div class="input-row">
                     <label for="num_people">Number of Adventurers:</label>
-                    <input type="number" id="num_people" name="num_people" min="1" value="1">
+                    <input type="number" id="num_people" name="num_people" min="" value="">
                 </div>
 
                 <div id="adventurer-fields">
                 </div>
+                <div id="booking-limit-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">×</span>
+        <p>Booking limit reached! You cannot add more adventurers.</p>
+    </div>
+</div>
 
                 <button type="button" class="submit-btn" onclick="togglePaymentSection()">Proceed to Payment</button>
-    <div id="payment-section" class="collapsible-content" style="display: none;">
-        <div class="inputbox">
-            <label for="ref_number">GCASH Reference Number (Required)</label>
-            <input type="text" id="ref_number" name="ref_number" required>
-        </div>
-
-        <div class="inputbox">
-            <label for="payment_upload">Upload Payment Proof (Optional)</label>
-            <input type="file" id="payment_upload" name="payment_upload" accept="image/*">
-        </div>
-
-        <div class="inputbox">
-            <label for="amount_paid">Amount Paid (Required)</label>
-            <input type="number" id="amount_paid" name="amount_paid" required>
-        </div>
-
-        <button type="submit" name="book_tour" class="submit-btn">Book Now</button>
+               
+<div id="payment-section" class="collapsible-content" style="display: none;">
+    <div class="inputbox">
+        <label for="ref_number">GCASH Reference Number (Required)</label>
+        <input type="text" id="ref_number" name="ref_number" required>
     </div>
+
+    <div class="inputbox">
+        <label for="payment_upload">Upload Payment Proof (Optional)</label>
+        <input type="file" id="payment_upload" name="payment_upload" accept="image/*">
+    </div>
+
+    <div class="inputbox">
+        <label for="amount_paid">Amount Paid (Required)</label>
+        <input type="number" id="amount_paid" name="amount_paid" required>
+    </div>
+
+    <button type="submit" name="book_tour" class="submit-btn">Book Now</button>
+</div>
 </form>
 
 <script>
@@ -272,47 +306,100 @@ $conn->close();
 </section>
 
 <script>
-    document.getElementById('num_people').addEventListener('input', function() {
-        let numPeople = this.value;
-        let adventurerFields = document.getElementById('adventurer-fields');
-        adventurerFields.innerHTML = ''; // Clear previous fields
+// Set the default number of adventurers based on the min_bookings value (fetched from PHP)
+// For exclusive tours, this will be min_bookings - 1, otherwise, it will be based on the number set in the database
+let numAdventurers = <?php echo $num_adventurers; ?>; // This value is dynamically fetched from the database
+let availableSlots = <?php echo $availableSlots; ?>;
 
-        for (let i = 0; i < numPeople; i++) {
-            adventurerFields.innerHTML += `
-                <h3>Adventurer ${i + 1}</h3>
-                <div class="input-row">
-                    <div class="inputbox">
-                        <label for="adventurer_name_${i}">Name:</label>
-                        <input type="text" id="adventurer_name_${i}" name="adventurer_name[]" required>
-                    </div>
-                    <div class="inputbox">
-                        <label for="adventurer_email_${i}">Email:</label>
-                        <input type="email" id="adventurer_email_${i}" name="adventurer_emails[]" required>
-                    </div>
+// Set the value of the num_people input field to the default number of adventurers
+document.getElementById('num_people').value = numAdventurers; 
+
+// Dynamically add adventurer fields based on the default number of adventurers when the page loads
+let adventurerFields = document.getElementById('adventurer-fields');
+for (let i = 0; i < numAdventurers; i++) {
+    adventurerFields.innerHTML += `
+        <h3>Adventurer ${i + 1}</h3>
+        <div class="input-row">
+            <div class="inputbox">
+                <label for="adventurer_name_${i}">Name:</label>
+                <input type="text" id="adventurer_name_${i}" name="adventurer_name[]" required>
+            </div>
+            <div class="inputbox">
+                <label for="adventurer_email_${i}">Email:</label>
+                <input type="email" id="adventurer_email_${i}" name="adventurer_emails[]" required>
+            </div>
+        </div>
+        <div class="input-row">
+            <div class="inputbox">
+                <label for="adventurer_phone_${i}">Phone Number:</label>
+                <input type="tel" id="adventurer_phone_${i}" name="adventurer_phones[]" required>
+            </div>
+            <div class="inputbox">
+                <label for="adventurer_age_${i}">Age:</label>
+                <input type="number" id="adventurer_age_${i}" name="adventurer_ages[]" required>
+            </div>
+        </div>
+        <div class="input-row">
+            <div class="inputbox">
+                <label for="adventurer_address_${i}">Address:</label>
+                <input type="text" id="adventurer_address_${i}" name="adventurer_address[]" required>
+            </div>
+            <div class="inputbox">
+                <label for="adventurer_valid_id_${i}">Valid ID for Adventurer ${i + 1}:</label>
+                <input type="file" id="adventurer_valid_id_${i}" name="adventurer_valid_id[]" required>
+            </div>
+        </div>`;
+}
+
+// Update the adventurer fields dynamically when the num_people input changes
+document.getElementById('num_people').addEventListener('input', function() {
+    let numPeople = this.value;
+    adventurerFields.innerHTML = ''; // Clear previous fields
+
+    // Check if the number of people exceeds the available slots
+    if (numPeople > availableSlots) {
+        alert("You cannot add more adventurers than available slots!");
+        return; // Stop adding fields if the max bookings are exceeded
+    }
+
+    // Add the adventurer fields dynamically based on the updated number of people
+    for (let i = 0; i < numPeople; i++) {
+        adventurerFields.innerHTML += `
+            <h3>Adventurer ${i + 1}</h3>
+            <div class="input-row">
+                <div class="inputbox">
+                    <label for="adventurer_name_${i}">Name:</label>
+                    <input type="text" id="adventurer_name_${i}" name="adventurer_name[]" required>
                 </div>
-                <div class="input-row">
-                    <div class="inputbox">
-                        <label for="adventurer_phone_${i}">Phone Number:</label>
-                        <input type="tel" id="adventurer_phone_${i}" name="adventurer_phones[]" required>
-                    </div>
-                    <div class="inputbox">
-                        <label for="adventurer_age_${i}">Age:</label>
-                        <input type="number" id="adventurer_age_${i}" name="adventurer_ages[]" required>
-                    </div>
+                <div class="inputbox">
+                    <label for="adventurer_email_${i}">Email:</label>
+                    <input type="email" id="adventurer_email_${i}" name="adventurer_emails[]" required>
                 </div>
-                <div class="input-row">
-                    <div class="inputbox">
-                        <label for="adventurer_address_${i}">Address:</label>
-                        <input type="text" id="adventurer_address_${i}" name="adventurer_address[]" required>
-                    </div>
-                    <div class="inputbox">
-                        <label for="adventurer_valid_id_${i}">Valid ID for Adventurer ${i + 1}:</label>
-                        <input type="file" id="adventurer_valid_id_${i}" name="adventurer_valid_id[]" required>
-                    </div>
-                </div>`;
-        }
-    });
+            </div>
+            <div class="input-row">
+                <div class="inputbox">
+                    <label for="adventurer_phone_${i}">Phone Number:</label>
+                    <input type="tel" id="adventurer_phone_${i}" name="adventurer_phones[]" required>
+                </div>
+                <div class="inputbox">
+                    <label for="adventurer_age_${i}">Age:</label>
+                    <input type="number" id="adventurer_age_${i}" name="adventurer_ages[]" required>
+                </div>
+            </div>
+            <div class="input-row">
+                <div class="inputbox">
+                    <label for="adventurer_address_${i}">Address:</label>
+                    <input type="text" id="adventurer_address_${i}" name="adventurer_address[]" required>
+                </div>
+                <div class="inputbox">
+                    <label for="adventurer_valid_id_${i}">Valid ID for Adventurer ${i + 1}:</label>
+                    <input type="file" id="adventurer_valid_id_${i}" name="adventurer_valid_id[]" required>
+                </div>
+            </div>`;
+    }
+});
 </script>
+
 
 </body>
 </html>
